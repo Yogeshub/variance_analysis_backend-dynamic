@@ -1,0 +1,29 @@
+{
+  "active_domain": "banking",
+
+  "banking": {
+    "required_columns": [
+      "bank_name",
+      "report_date",
+      "branch_id",
+      "total_revenue",
+      "interest_income",
+      "operating_expenses",
+      "net_profit",
+      "total_loan_book",
+      "npa_ratio"
+    ],
+    "date_column": "report_date"
+  },
+
+  "ecommerce": {
+    "required_columns": [
+      "order_id",
+      "order_date",
+      "product_id",
+      "revenue",
+      "customer_id"
+    ],
+    "date_column": "order_date"
+  }
+}

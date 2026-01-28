@@ -1,0 +1,14 @@
+{
+  "banking": {
+    "required_columns": ["report_date"],
+    "date_column": "report_date"
+  },
+  "finance": {
+    "required_columns": ["report_date"],
+    "date_column": "report_date"
+  },
+  "ecommerce": {
+    "required_columns": ["order_date"],
+    "date_column": "order_date"
+  }
+}
