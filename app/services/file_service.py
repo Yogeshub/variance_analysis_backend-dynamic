@@ -1,49 +1,46 @@
 import pandas as pd
 import io
-from fastapi import HTTPException
-import json
-import os
+from fastapi import UploadFile, HTTPException
+from app.core.config import settings
 
-DOMAIN_CONFIG_PATH = os.path.join("app", "core", "domain_config.json")
 
-def load_domain_config():
-    with open(DOMAIN_CONFIG_PATH) as f:
-        return json.load(f)
+async def validate_and_read_file(file: UploadFile) -> pd.DataFrame:
+    content = await file.read()
 
-def parse_file(file_bytes: bytes, filename: str):
-    if not file_bytes:
-        raise HTTPException(status_code=400, detail="Uploaded file is empty")
+    # 1️⃣ File size validation
+    size_mb = len(content) / (1024 * 1024)
+    if size_mb > settings.MAX_FILE_SIZE_MB:
+        raise HTTPException(
+            status_code=400, detail=f"File exceeds {settings.MAX_FILE_SIZE_MB}MB limit"
+        )
 
+    # 2️⃣ Parse CSV / Excel
     try:
-        if filename.endswith(".csv"):
-            df = pd.read_csv(io.BytesIO(file_bytes))
-        elif filename.endswith(".xlsx"):
-            df = pd.read_excel(io.BytesIO(file_bytes))
+        if file.filename.endswith(".csv"):
+            df = pd.read_csv(io.BytesIO(content))
+        elif file.filename.endswith((".xlsx", ".xls")):
+            df = pd.read_excel(io.BytesIO(content))
         else:
             raise HTTPException(status_code=400, detail="Unsupported file format")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"File parsing failed: {str(e)}")
 
+    # 3️⃣ Header validation
+    if df.columns.tolist() == list(range(len(df.columns))):
+        raise HTTPException(
+            status_code=400, detail="Uploaded file does not contain valid headers"
+        )
+
     if df.empty:
         raise HTTPException(status_code=400, detail="File contains no data")
 
-    if not df.columns.tolist():
-        raise HTTPException(status_code=400, detail="Missing headers in file")
+    # 4️⃣ Row limit validation
+    if len(df) > settings.MAX_ROWS:
+        raise HTTPException(
+            status_code=400, detail=f"File exceeds {settings.MAX_ROWS} row limit"
+        )
 
-    df.columns = [c.strip() for c in df.columns]
+    # Normalize headers
+    df.columns = [str(c).strip() for c in df.columns]
+
     return df
-
-def validate_domain(df, domain):
-    configs = load_domain_config()
-    if domain not in configs:
-        raise HTTPException(status_code=400, detail="Invalid domain configuration")
-
-    required = configs[domain]["required_columns"]
-    for col in required:
-        if col not in df.columns:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Uploaded file does not match configured domain '{domain}'"
-            )
-
-    return configs[domain]

@@ -3,14 +3,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class Settings:
-    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-    GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+    APP_NAME: str = "Variance Analysis Enterprise Engine"
+    VERSION: str = "1.0.0"
 
-    EMAIL_TO = os.getenv("EMAIL_TO")
-    EMAIL_CC = os.getenv("EMAIL_CC")
-    EMAIL_SUBJECT = os.getenv("EMAIL_SUBJECT", "KPI Variance Report")
+    # File Controls
+    MAX_FILE_SIZE_MB: int = 10
+    MAX_ROWS: int = 100_000
 
-    ALLOWED_DOMAINS = ["banking"]
+    # Database
+    DATABASE_URL: str = "sqlite:///./kpi_app.db"
+
+    # AI
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+
 
 settings = Settings()

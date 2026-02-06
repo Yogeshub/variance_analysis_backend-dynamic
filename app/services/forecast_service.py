@@ -1,23 +1,44 @@
-from sklearn.linear_model import LinearRegression
-import numpy as np
+import pandas as pd
+from prophet import Prophet
 
-def forecast_next_period(kpi_df):
-    forecasts = {}
 
-    if len(kpi_df) < 2:
-        return {}
+class ForecastService:
 
-    for col in kpi_df.columns:
-        if col == "ReportingMonth":
-            continue
+    @staticmethod
+    def forecast_single(df: pd.DataFrame, date_column: str, kpi: str, periods: int = 6):
+        try:
+            temp_df = df[[date_column, kpi]].copy()
+            temp_df = temp_df.rename(columns={date_column: "ds", kpi: "y"})
+            temp_df["ds"] = pd.to_datetime(temp_df["ds"], errors="coerce")
 
-        y = kpi_df[col].values
-        X = np.arange(len(y)).reshape(-1, 1)
+            temp_df = temp_df.dropna()
+            temp_df = temp_df.sort_values("ds")
 
-        model = LinearRegression()
-        model.fit(X, y)
+            if temp_df.empty or len(temp_df) < 3:
+                return {"error": f"Not enough data to forecast {kpi}"}
 
-        next_pred = model.predict([[len(y)]])[0]
-        forecasts[col] = round(float(next_pred), 2)
+            model = Prophet()
+            model.fit(temp_df)
 
-    return forecasts
+            future = model.make_future_dataframe(periods=periods, freq="M")
+            forecast = model.predict(future)
+
+            result = forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail(periods)
+
+            return result.to_dict(orient="records")
+
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
+    def forecast_multiple(
+        df: pd.DataFrame, date_column: str, kpis: list, periods: int = 6
+    ):
+        results = {}
+
+        for kpi in kpis:
+            results[kpi] = ForecastService.forecast_single(
+                df, date_column, kpi, periods
+            )
+
+        return results

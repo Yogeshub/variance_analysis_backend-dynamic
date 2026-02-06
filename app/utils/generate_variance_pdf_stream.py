@@ -3,6 +3,7 @@ from reportlab.pdfgen import canvas
 from utils.pdf_builder import build_variance_pdf
 from reportlab.lib.pagesizes import letter  # ← add this
 
+
 def generate_variance_pdf_stream(kpi_summary, variance, ai_insight=""):
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)

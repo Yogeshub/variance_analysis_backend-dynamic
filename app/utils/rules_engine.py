@@ -1,5 +1,6 @@
 import math
 
+
 def generate_rule_based_explanation(row, rules):
     explanations = []
     for rule in rules:

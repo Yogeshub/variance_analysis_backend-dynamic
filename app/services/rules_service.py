@@ -1,5 +1,6 @@
 import math
 
+
 def apply_rules(row, rules):
     messages = []
 

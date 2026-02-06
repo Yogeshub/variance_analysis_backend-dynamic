@@ -1,5 +1,6 @@
 from reportlab.pdfgen import canvas
 
+
 def build_variance_pdf(canvas_obj, kpi_summary, variance, ai_insight=None):
     y = 750
 

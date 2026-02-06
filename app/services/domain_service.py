@@ -1,18 +1,40 @@
-from fastapi import HTTPException
-from app.core.config import get_active_domain
+import json
+import os
+import pandas as pd
 
-def validate_domain(df):
-    domain_name, domain_config = get_active_domain()
 
-    missing = [
-        col for col in domain_config["required_columns"]
-        if col not in df.columns
-    ]
+def load_domain_config():
+    path = os.path.join("app", "core", "domain_config.json")
+    with open(path, "r") as f:
+        return json.load(f)
 
-    if missing:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Configured domain '{domain_name}' requires columns: {missing}"
-        )
 
-    return domain_config["date_column"]
+def detect_domain(df: pd.DataFrame):
+    config = load_domain_config()
+    allowed = config["allowed_domains"]
+
+    detected = []
+
+    for domain_name, domain_info in allowed.items():
+        required_cols = domain_info.get("required_columns", [])
+
+        if any(col in df.columns for col in required_cols):
+            detected.append(domain_name)
+
+    if not detected:
+        detected.append(config["default_domain"])
+
+    return detected
+
+
+def detect_subdomains(df: pd.DataFrame, domain: str):
+    config = load_domain_config()
+    domain_info = config["allowed_domains"].get(domain, {})
+
+    candidates = domain_info.get("domain_column_candidates", [])
+
+    for col in candidates:
+        if col in df.columns:
+            return {"column": col, "values": df[col].dropna().unique().tolist()}
+
+    return None

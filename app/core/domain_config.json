@@ -1,14 +1,13 @@
 {
-  "banking": {
-    "required_columns": ["report_date"],
-    "date_column": "report_date"
-  },
-  "finance": {
-    "required_columns": ["report_date"],
-    "date_column": "report_date"
-  },
-  "ecommerce": {
-    "required_columns": ["order_date"],
-    "date_column": "order_date"
+  "default_domain": "banking",
+  "allowed_domains": {
+    "banking": {
+      "required_columns": ["report_date"],
+      "domain_column_candidates": ["product_type", "business_line", "segment"]
+    },
+    "ecommerce": {
+      "required_columns": ["order_date"],
+      "domain_column_candidates": ["category", "product_category"]
+    }
   }
 }
