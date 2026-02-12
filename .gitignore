@@ -63,3 +63,9 @@ Thumbs.db
 *.db
 __pycache__/
 *.pyc
+
+
+# Ignore SQLite database
+*.db
+# or just the specific file
+app.db
