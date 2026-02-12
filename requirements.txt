@@ -10,6 +10,7 @@ numpy
 prophet
 python-multipart
 python-dotenv
+plotly
 reportlab
 #pywin32
 scikit-learn
