@@ -1,0 +1,33 @@
+[33mcommit d5dfb79fec63d6e8efa13ad12f4905d0c1bb94bf[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Merge: 47a7d16 e00a0ef
+Author: Yogesh Rao <yogeshrao200193@gmail.com>
+Date:   Thu Feb 12 17:58:25 2026 +0530
+
+    Merge remote-tracking branch 'origin/main'
+    
+    # Conflicts:
+    #       app/api/admin.py
+
+[33mcommit 47a7d16be0b3a705e6696b499ed1875ac1acdaf2[m
+Author: Yogesh Rao <yogeshrao200193@gmail.com>
+Date:   Thu Feb 12 17:29:13 2026 +0530
+
+    remove .env from tracking
+
+[33mcommit 2acfcbe2c38f3ed934ce0cc127741c1eac4c1b6c[m
+Author: Yogesh Rao <yogeshrao200193@gmail.com>
+Date:   Thu Feb 12 17:19:18 2026 +0530
+
+    push latest changes
+
+[33mcommit b1dc31a08404785a001b07dcc0018d6d7526c160[m
+Author: Yogesh Rao <yogeshrao200193@gmail.com>
+Date:   Thu Feb 12 13:07:20 2026 +0530
+
+    req file updated
+
+[33mcommit 5b0fa625558db070fdf49f94a43d4878499ccea4[m
+Author: Yogesh Rao <yogeshrao200193@gmail.com>
+Date:   Thu Feb 12 16:58:50 2026 +0530
+
+    new commit
