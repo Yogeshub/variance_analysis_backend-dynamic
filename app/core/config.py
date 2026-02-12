@@ -9,6 +9,7 @@ class Settings:
     VERSION: str = "1.0.0"
 
     # File Controls
+
     MAX_FILE_SIZE_MB: int = 10
     MAX_ROWS: int = 100_000
 

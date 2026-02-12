@@ -58,3 +58,8 @@ Thumbs.db
 .pytest_cache/
 .mypy_cache/
 /.env
+
+.env
+*.db
+__pycache__/
+*.pyc
