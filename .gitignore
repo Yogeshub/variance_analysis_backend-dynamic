@@ -57,3 +57,4 @@ Thumbs.db
 # Python tooling
 .pytest_cache/
 .mypy_cache/
+/.env
