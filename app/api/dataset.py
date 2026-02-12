@@ -3,8 +3,10 @@ import pandas as pd
 import io
 import json
 from app.core.database import get_connection
+from app.services.domain_service import detect_domain, detect_subdomains
+from app.services.prompt_service import generate_prompt_suggestions
 
-router = APIRouter()
+router = APIRouter(tags=["Upload Dataset"])
 
 MAX_FILE_SIZE = 10 * 1024 * 1024
 MAX_ROWS = 100000
@@ -22,10 +24,7 @@ def detect_date_column(df):
 
 
 @router.post("/upload")
-async def upload_dataset(
-    session_id: str = Form(...),
-    file: UploadFile = File(...)
-):
+async def upload_dataset(session_id: str = Form(...), file: UploadFile = File(...)):
     content = await file.read()
 
     if len(content) > MAX_FILE_SIZE:
@@ -43,6 +42,14 @@ async def upload_dataset(
         raise HTTPException(status_code=400, detail="No valid headers detected")
 
     date_column = detect_date_column(df)
+    # Domain detection
+    detected_domains = detect_domain(df)
+
+    # Subdomain detection (use first detected domain)
+    subdomain_info = None
+    if detected_domains:
+        subdomain_info = detect_subdomains(df, detected_domains[0])
+
     if not date_column:
         raise HTTPException(status_code=400, detail="No date column detected")
 
@@ -55,22 +62,29 @@ async def upload_dataset(
         else:
             invalid_kpis.append({"column": col, "reason": "Non-numeric or empty"})
 
+    detected_subdomain_column = subdomain_info.get("column")
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        INSERT OR REPLACE INTO datasets (session_id, dataset_json, date_column)
-        VALUES (?, ?, ?)
-    """, (session_id, df.to_json(), date_column))
+    cursor.execute(
+        """
+        INSERT OR REPLACE INTO datasets (session_id, dataset_json, date_column,subdomain_column )
+        VALUES (?, ?, ?, ?)
+    """,
+        (session_id, df.to_json(), date_column, detected_subdomain_column),
+    )
 
     conn.commit()
     conn.close()
 
     return {
         "message": "File processed successfully",
+        "detected_domains": detected_domains,
+        "subdomain_info": subdomain_info,
         "date_column": date_column,
         "total_rows": len(df),
         "total_columns": len(df.columns),
         "valid_kpis": valid_kpis,
-        "invalid_kpis": invalid_kpis
+        "invalid_kpis": invalid_kpis,
+        "suggested_prompts": generate_prompt_suggestions(detected_domains),
     }

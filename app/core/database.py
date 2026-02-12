@@ -2,6 +2,7 @@ import sqlite3
 
 DB_PATH = "app.db"
 
+
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -34,8 +35,8 @@ def init_db():
     CREATE TABLE IF NOT EXISTS analysis_results (
         session_id TEXT PRIMARY KEY,
         result_json TEXT,
-        ai_insights_json TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        ai_insights_json TEXT,
         FOREIGN KEY(session_id) REFERENCES sessions(session_id)
     )
     """)
@@ -50,5 +51,36 @@ def init_db():
     )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS prompt_templates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        domain TEXT,
+        prompt_type TEXT,   
+        prompt_text TEXT
+        )
+        """)
+
     conn.commit()
     conn.close()
+
+
+# from sqlalchemy import create_engine
+# from sqlalchemy.orm import sessionmaker, declarative_base
+# from app.core.config import settings
+#
+# engine = create_engine(
+#     settings.DATABASE_URL,
+#     connect_args={"check_same_thread": False}
+# )
+#
+# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+#
+# Base = declarative_base()
+#
+#
+# def get_db():
+#     db = SessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
