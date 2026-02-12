@@ -35,8 +35,8 @@ def init_db():
     CREATE TABLE IF NOT EXISTS analysis_results (
         session_id TEXT PRIMARY KEY,
         result_json TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         ai_insights_json TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY(session_id) REFERENCES sessions(session_id)
     )
     """)
