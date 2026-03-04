@@ -69,3 +69,5 @@ __pycache__/
 *.db
 # or just the specific file
 app.db
+VA_Backend.zip
+app/VA_Backend.zip

@@ -1,11 +1,42 @@
+# admin.py
 from fastapi import APIRouter, Query, HTTPException
 from app.core.database import get_connection
+from datetime import datetime, timezone
 
 router = APIRouter(tags=["Admin"])
 
 
 def get_pagination(limit: int, offset: int):
     return limit, offset
+
+
+def to_iso_string(value):
+    """
+    Convert SQLite/DB timestamp values to RFC 3339 / ISO 8601 strings that Power Apps accepts.
+    - If value is a datetime (naive -> assume UTC), serialize to ISO.
+    - If value is a string 'YYYY-MM-DD HH:MM:SS[.ffffff]', convert to 'YYYY-MM-DDTHH:MM:SS[.ffffff]Z'.
+    - If already ISO-like with 'T', return as-is (add 'Z' if missing tz).
+    """
+    if value is None:
+        return None
+
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return value.isoformat()
+
+    s = str(value).strip()
+
+    # Already ISO-like with 'T'
+    if 'T' in s:
+        # If no timezone indicator, append Z to mark UTC
+        if ('Z' in s) or ('+' in s[10:]) or ('-' in s[10:]):
+            return s
+        return s + 'Z'
+
+    # Convert 'YYYY-MM-DD HH:MM:SS[.ffffff]' -> 'YYYY-MM-DDTHH:MM:SS[.ffffff]Z'
+    s = s.replace(' ', 'T')
+    return s + 'Z'
 
 
 @router.get("/sessions")
@@ -26,7 +57,15 @@ def get_sessions(limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge
     rows = cursor.fetchall()
     conn.close()
 
-    return rows
+    # Normalize created_at
+    result = []
+    for r in rows:
+        item = dict(r)
+        if "created_at" in item:
+            item["created_at"] = to_iso_string(item["created_at"])
+        result.append(item)
+
+    return result
 
 
 @router.get("/datasets")
@@ -47,7 +86,14 @@ def get_datasets(limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge
     rows = cursor.fetchall()
     conn.close()
 
-    return rows
+    result = []
+    for r in rows:
+        item = dict(r)
+        if "created_at" in item:
+            item["created_at"] = to_iso_string(item["created_at"])
+        result.append(item)
+
+    return result
 
 
 @router.get("/analysis-results")
@@ -70,7 +116,14 @@ def get_analysis_results(
     rows = cursor.fetchall()
     conn.close()
 
-    return rows
+    result = []
+    for r in rows:
+        item = dict(r)
+        if "created_at" in item:
+            item["created_at"] = to_iso_string(item["created_at"])
+        result.append(item)
+
+    return result
 
 
 @router.get("/chat-history")
@@ -93,7 +146,14 @@ def get_chat_history(
     rows = cursor.fetchall()
     conn.close()
 
-    return rows
+    result = []
+    for r in rows:
+        item = dict(r)
+        if "created_at" in item:
+            item["created_at"] = to_iso_string(item["created_at"])
+        result.append(item)
+
+    return result
 
 
 @router.delete("/sessions/{session_id}")
